@@ -26,7 +26,7 @@ jobs:
           cat > .gclient <<EOF
           solutions = [
             {
-              "name": "src/flutter",
+              "name": "flutter",
               "url": "https://github.com/${{ github.repository }}.git@${{ github.sha }}",
               "deps_file": "DEPS",
               "managed": False,
@@ -35,7 +35,7 @@ jobs:
           ]
           EOF
           gclient sync --no-history --shallow -j4
-
+          
       - name: Install Linux deps
         run: |
           sudo apt-get update
@@ -43,6 +43,6 @@ jobs:
 
       - name: Build
         run: |
-          cd engine/src
+          cd engine/engine/src
           flutter/tools/gn --no-goma --runtime-mode=debug --target-dir host_debug
           ninja -C out/host_debug flutter/shell/platform/linux
