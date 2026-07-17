@@ -1011,8 +1011,6 @@ void fl_engine_remove_view(FlEngine* self,
                            gpointer user_data) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
-  remove_renderable(self, view_id);
-
   g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
 
   FlutterRemoveViewInfo info;
@@ -1028,7 +1026,14 @@ void fl_engine_remove_view(FlEngine* self,
                             result);
     // This would have been done in the callback, but that won't occur now.
     g_object_unref(task);
+    return;
   }
+
+  // Stop presenting to this view. This is done only after the engine has
+  // accepted the removal, so that a failed RemoveView leaves the engine and
+  // embedder state consistent — otherwise the engine keeps producing frames
+  // for a view that no longer has a renderable.
+  remove_renderable(self, view_id);
 }
 
 gboolean fl_engine_remove_view_finish(FlEngine* self,

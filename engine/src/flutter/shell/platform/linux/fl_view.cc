@@ -523,9 +523,15 @@ static void fl_view_dispose(GObject* object) {
       fl_text_input_handler_set_widget(text_input_handler, nullptr);
     }
 
-    // Release the view ID from the engine.
-    fl_engine_remove_view(self->engine, self->view_id, nullptr, nullptr,
-                          nullptr);
+    // Release the view ID from the engine. The implicit view cannot be
+    // removed (FlutterEngineRemoveView rejects it with kInvalidArguments);
+    // its renderable is held via a weak reference and is cleared
+    // automatically when this view is finalized, and the engine itself is
+    // shut down when the last reference to it is dropped below.
+    if (self->view_id != flutter::kFlutterImplicitViewId) {
+      fl_engine_remove_view(self->engine, self->view_id, nullptr, nullptr,
+                            nullptr);
+    }
   }
 
   g_clear_object(&self->engine);
