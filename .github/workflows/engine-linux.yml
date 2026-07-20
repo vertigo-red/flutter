@@ -15,6 +15,9 @@ jobs:
           sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
           df -h /
 
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Install depot_tools
         run: |
           git clone --depth=1 https://chromium.googlesource.com/chromium/tools/depot_tools.git "$HOME/depot_tools"
@@ -22,11 +25,10 @@ jobs:
 
       - name: gclient sync
         run: |
-          mkdir engine && cd engine
           cat > .gclient <<EOF
           solutions = [
             {
-              "name": "flutter",
+              "name": ".",
               "url": "https://github.com/${{ github.repository }}.git@${{ github.sha }}",
               "deps_file": "DEPS",
               "managed": False,
@@ -34,8 +36,8 @@ jobs:
             },
           ]
           EOF
-          gclient sync --no-history --shallow -j4
-          
+          gclient sync --no-history -j4
+
       - name: Install Linux deps
         run: |
           sudo apt-get update
@@ -43,6 +45,6 @@ jobs:
 
       - name: Build
         run: |
-          cd engine/engine/src
+          cd engine/src
           flutter/tools/gn --no-goma --runtime-mode=debug --target-dir host_debug
           ninja -C out/host_debug flutter/shell/platform/linux
