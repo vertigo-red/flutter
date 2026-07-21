@@ -48,3 +48,13 @@ jobs:
           cd engine/src
           flutter/tools/gn --no-goma --runtime-mode=debug --target-dir host_debug
           ninja -C out/host_debug flutter/shell/platform/linux
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: host_debug-linux-x64
+          path: |
+            engine/src/out/host_debug/libflutter_linux_gtk.so
+            engine/src/out/host_debug/libflutter_engine.so
+            engine/src/out/host_debug/icudtl.dat
+          if-no-files-found: error
